@@ -10,12 +10,6 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Cliente SOAP que consome o ValeService.
- * Demonstra todas as operações disponíveis no WebService.
- *
- * Pre-requisito: ServicePublisher deve estar rodando em http://localhost:8080/vale
- */
 public class ValeClient {
 
     private static final String ENDPOINT  = "http://localhost:8080/vale";
@@ -64,7 +58,6 @@ public class ValeClient {
         System.out.println("========================================\n");
     }
 
-    // ---- Envelopes SOAP ----
 
     private static String envelopeListarFuncionarios() {
         return envelope("<ser:listarFuncionarios/>");
@@ -101,7 +94,6 @@ public class ValeClient {
                 "</soapenv:Body></soapenv:Envelope>";
     }
 
-    // ---- HTTP + tratamento de erro ----
 
     private static String enviar(String envelope) throws Exception {
         URL url = URI.create(ENDPOINT).toURL(); // evita deprecation do new URL(String)

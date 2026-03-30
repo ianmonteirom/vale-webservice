@@ -1,5 +1,9 @@
 # 💰 Vale WebService — Adiantamento Salarial SOAP
 
+<p align="center">
+  <img src="./logo.png" alt="Vale WebService Logo" width="300"/>
+</p>
+
 **CP1 - SOA | Turma: 3ESPX**
 
 **Desenvolvido por:**
