@@ -5,14 +5,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-/**
- * Representa uma solicitação de vale (adiantamento salarial).
- *
- * Regras de negócio:
- * - O percentual solicitado deve respeitar os limites do TipoVale.
- * - Apenas um vale ativo por funcionário por mês é permitido.
- * - O vale é descontado integralmente no pagamento oficial do mês seguinte.
- */
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Vale", propOrder = {

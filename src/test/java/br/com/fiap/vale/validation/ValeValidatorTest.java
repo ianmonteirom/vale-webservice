@@ -26,7 +26,6 @@ class ValeValidatorTest {
         validator = new ValeValidator(stub);
     }
 
-    // ---- validarPercentual ----
 
     @Test
     @DisplayName("deve aceitar percentual no limite mínimo do ADIANTAMENTO_MENSAL")
@@ -70,7 +69,6 @@ class ValeValidatorTest {
                 validator.validarPercentual(49.0, TipoVale.DECIMO_TERCEIRO));
     }
 
-    // ---- validarValeUnicoPorMes ----
 
     @Test
     @DisplayName("deve lançar ValeDuplicadoException se já existe vale ativo no mês")
@@ -88,7 +86,6 @@ class ValeValidatorTest {
                 validator.validarValeUnicoPorMes(1, "Ana Silva", "2026-03"));
     }
 
-    // ---- validarValeCancelavel ----
 
     @Test
     @DisplayName("deve lançar ValeNaoEncontradoException para ID inexistente")

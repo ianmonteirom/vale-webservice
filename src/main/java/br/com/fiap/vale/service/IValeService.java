@@ -6,9 +6,6 @@ import br.com.fiap.vale.model.Vale;
 
 import java.util.List;
 
-/**
- * Contrato das operações de negócio do ValeService.
- */
 public interface IValeService {
 
     List<Funcionario> listarFuncionarios();

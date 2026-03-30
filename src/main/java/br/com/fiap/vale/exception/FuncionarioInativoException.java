@@ -1,8 +1,5 @@
 package br.com.fiap.vale.exception;
 
-/**
- * Lançada quando um funcionário inativo tenta solicitar um vale.
- */
 public class FuncionarioInativoException extends ValeException {
 
     public FuncionarioInativoException(String nomeFuncionario) {

@@ -9,10 +9,6 @@ import br.com.fiap.vale.util.Constantes;
 import java.util.Optional;
 import java.util.logging.Logger;
 
-/**
- * Responsável por validar regras relacionadas ao Funcionario.
- * Centraliza as validações para evitar duplicação no ValeService.
- */
 public class FuncionarioValidator {
 
     private static final Logger LOGGER = Logger.getLogger(FuncionarioValidator.class.getName());
@@ -23,12 +19,6 @@ public class FuncionarioValidator {
         this.repository = repository;
     }
 
-    /**
-     * Busca e valida o funcionário — lança exceção se não encontrado ou inativo.
-     *
-     * @param funcionarioId ID do funcionário
-     * @return Funcionario validado
-     */
     public Funcionario validarFuncionarioAtivo(int funcionarioId) {
         LOGGER.info(String.format(Constantes.LOG_VALIDANDO_FUNCIONARIO, funcionarioId));
 

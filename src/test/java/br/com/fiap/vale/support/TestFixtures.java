@@ -10,17 +10,10 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-/**
- * Centraliza fixtures e stubs reutilizados nos testes.
- *
- * Elimina a duplicação de repositórios in-memory espalhados
- * em ValeServiceTest, ValeValidatorTest e FuncionarioValidatorTest.
- */
 public final class TestFixtures {
 
     private TestFixtures() {}
 
-    // ---- Funcionários de teste ----
 
     public static Funcionario funcionarioAtivo() {
         return new Funcionario(1, "Ana Silva", "Desenvolvedora Backend", 8500.00, true);
@@ -34,7 +27,6 @@ public final class TestFixtures {
         return new Funcionario(6, "Funcionário Inativo", "Cargo", 3000.00, false);
     }
 
-    // ---- Vales de teste ----
 
     public static Vale valeAprovado() {
         return new Vale(1, 1, "Ana Silva", 8500.00, 35.0, 2975.00,
@@ -46,12 +38,6 @@ public final class TestFixtures {
                 TipoVale.ADIANTAMENTO_MENSAL, LocalDate.now().toString(), StatusVale.CANCELADO);
     }
 
-    // ---- Repositório in-memory para testes de integração ----
-
-    /**
-     * Repositório completo com dados pré-carregados.
-     * Usado em ValeServiceTest para testes de integração reais.
-     */
     public static class InMemoryValeRepository implements IValeRepository {
 
         private final List<Funcionario> funcionarios = new ArrayList<>(java.util.Arrays.asList(
@@ -103,12 +89,6 @@ public final class TestFixtures {
         }
     }
 
-    // ---- Stub configurável para testes unitários isolados ----
-
-    /**
-     * Stub simples com comportamento configurável via setters.
-     * Usado em ValeValidatorTest e FuncionarioValidatorTest.
-     */
     public static class StubRepository implements IValeRepository {
 
         private Optional<Funcionario> funcionario = Optional.empty();

@@ -9,17 +9,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-/**
- * Implementação em memória do IValeRepository.
- * Pode ser substituída por uma implementação JPA/JDBC sem alterar nenhuma outra camada.
- *
- * Nota: os dados são mantidos por instância — cada instância tem seu próprio estado.
- * O ServicePublisher cria uma única instância via ValeService(), garantindo
- * que os dados persistam durante toda a execução do servidor.
- */
 public class ValeRepository implements IValeRepository {
 
-    // Instância — não static, evita compartilhamento de estado entre testes e execuções
     private final List<Funcionario> funcionarios = new ArrayList<>();
     private final List<Vale> vales = new ArrayList<>();
     private final AtomicInteger valeIdCounter = new AtomicInteger(1);
