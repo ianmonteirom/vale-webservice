@@ -55,7 +55,7 @@ public class ValeValidator {
 
         Vale vale = valeOpt.get();
 
-        if ("CANCELADO".equals(vale.getStatus())) {
+        if (!vale.getStatus().isCancelavel()) {
             throw new ValeCanceladoException(valeId);
         }
 

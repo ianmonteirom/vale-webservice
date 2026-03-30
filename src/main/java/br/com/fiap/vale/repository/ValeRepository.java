@@ -1,6 +1,7 @@
 package br.com.fiap.vale.repository;
 
 import br.com.fiap.vale.model.Funcionario;
+import br.com.fiap.vale.model.StatusVale;
 import br.com.fiap.vale.model.Vale;
 
 import java.util.ArrayList;
@@ -18,16 +19,13 @@ public class ValeRepository implements IValeRepository {
     private static final List<Vale> vales = new ArrayList<>();
     private static final AtomicInteger valeIdCounter = new AtomicInteger(1);
 
-    // Pré-popula funcionários com salários reais de mercado
     static {
-        funcionarios.add(new Funcionario(1, "Ana Silva",       "Desenvolvedora Backend", 8500.00, true));
-        funcionarios.add(new Funcionario(2, "Carlos Mendes",   "Analista de QA",         5200.00, true));
-        funcionarios.add(new Funcionario(3, "Fernanda Rocha",  "Scrum Master",           9800.00, true));
-        funcionarios.add(new Funcionario(4, "Rafael Oliveira", "Designer UX/UI",         6300.00, true));
+        funcionarios.add(new Funcionario(1, "Ana Silva",       "Desenvolvedora Backend", 8500.00,  true));
+        funcionarios.add(new Funcionario(2, "Carlos Mendes",   "Analista de QA",         5200.00,  true));
+        funcionarios.add(new Funcionario(3, "Fernanda Rocha",  "Scrum Master",           9800.00,  true));
+        funcionarios.add(new Funcionario(4, "Rafael Oliveira", "Designer UX/UI",         6300.00,  true));
         funcionarios.add(new Funcionario(5, "Juliana Costa",   "DevOps Engineer",        11000.00, true));
     }
-
-    // ---- Funcionários ----
 
     @Override
     public List<Funcionario> listarFuncionarios() {
@@ -40,8 +38,6 @@ public class ValeRepository implements IValeRepository {
                 .filter(f -> f.getId() == id)
                 .findFirst();
     }
-
-    // ---- Vales ----
 
     @Override
     public Vale salvarVale(Vale vale) {
@@ -62,14 +58,18 @@ public class ValeRepository implements IValeRepository {
         return new ArrayList<>(vales);
     }
 
-    /**
-     * Verifica se o funcionário já possui um vale APROVADO ou PENDENTE no mês corrente.
-     */
+    @Override
+    public List<Vale> listarValesPorFuncionario(int funcionarioId) {
+        return vales.stream()
+                .filter(v -> v.getFuncionarioId() == funcionarioId)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
     @Override
     public boolean possuiValeAtivoNoMes(int funcionarioId, String mesAno) {
         return vales.stream()
                 .anyMatch(v -> v.getFuncionarioId() == funcionarioId
-                        && v.getDatasolicitacao().startsWith(mesAno)
-                        && (v.getStatus().equals("APROVADO") || v.getStatus().equals("PENDENTE")));
+                        && v.getDataSolicitacao().startsWith(mesAno)
+                        && v.getStatus().isCancelavel());
     }
 }

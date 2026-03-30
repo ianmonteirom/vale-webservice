@@ -1,13 +1,12 @@
 package br.com.fiap.vale.model;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlEnum;
 
 /**
  * Representa uma solicitação de vale (adiantamento salarial).
  *
  * Regras de negócio:
- * - O percentual solicitado deve ser entre 30% e 40% do salário bruto.
+ * - O percentual solicitado deve respeitar os limites do TipoVale.
  * - Apenas um vale ativo por funcionário por mês é permitido.
  * - O vale é descontado integralmente no pagamento oficial do mês seguinte.
  */
@@ -18,18 +17,18 @@ public class Vale {
     private int funcionarioId;
     private String nomeFuncionario;
     private double salarioBruto;
-    private double percentualSolicitado; // entre 30 e 40
-    private double valorAdiantado;       // salarioBruto * (percentualSolicitado / 100)
-    private TipoVale tipoVale;           // tipo do adiantamento solicitado
-    private String datasolicitacao;
-    private String status;               // PENDENTE, APROVADO, CANCELADO
+    private double percentualSolicitado;
+    private double valorAdiantado;
+    private TipoVale tipoVale;
+    private String dataSolicitacao;
+    private StatusVale status;
 
     public Vale() {}
 
     public Vale(int id, int funcionarioId, String nomeFuncionario,
                 double salarioBruto, double percentualSolicitado,
                 double valorAdiantado, TipoVale tipoVale,
-                String dataSolicitacao, String status) {
+                String dataSolicitacao, StatusVale status) {
         this.id = id;
         this.funcionarioId = funcionarioId;
         this.nomeFuncionario = nomeFuncionario;
@@ -37,7 +36,7 @@ public class Vale {
         this.percentualSolicitado = percentualSolicitado;
         this.valorAdiantado = valorAdiantado;
         this.tipoVale = tipoVale;
-        this.datasolicitacao = dataSolicitacao;
+        this.dataSolicitacao = dataSolicitacao;
         this.status = status;
     }
 
@@ -62,9 +61,9 @@ public class Vale {
     public TipoVale getTipoVale() { return tipoVale; }
     public void setTipoVale(TipoVale tipoVale) { this.tipoVale = tipoVale; }
 
-    public String getDatasolicitacao() { return datasolicitacao; }
-    public void setDatasolicitacao(String datasolicitacao) { this.datasolicitacao = datasolicitacao; }
+    public String getDataSolicitacao() { return dataSolicitacao; }
+    public void setDataSolicitacao(String dataSolicitacao) { this.dataSolicitacao = dataSolicitacao; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public StatusVale getStatus() { return status; }
+    public void setStatus(StatusVale status) { this.status = status; }
 }

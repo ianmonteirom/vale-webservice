@@ -8,15 +8,17 @@ import java.util.List;
 
 /**
  * Contrato das operações de negócio do ValeService.
- * Desacopla o WebService da implementação concreta,
- * facilitando testes, mocks e futuras versões do serviço.
  */
 public interface IValeService {
 
-    /**
-     * Retorna todos os funcionários cadastrados.
-     */
+    /** Retorna todos os funcionários cadastrados. */
     List<Funcionario> listarFuncionarios();
+
+    /** Retorna todos os vales registrados. */
+    List<Vale> listarVales();
+
+    /** Retorna todos os vales de um funcionário específico. */
+    List<Vale> listarValesPorFuncionario(int funcionarioId);
 
     /**
      * Solicita um adiantamento salarial para o funcionário.

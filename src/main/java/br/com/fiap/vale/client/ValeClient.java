@@ -8,18 +8,13 @@ import java.util.Scanner;
 
 /**
  * Cliente SOAP que consome o ValeService.
+ * Demonstra todas as operações disponíveis no WebService.
  *
- * Demonstra as 3 operações disponíveis no WebService:
- *   1. listarFuncionarios()
- *   2. solicitarVale(funcionarioId, percentualSolicitado)
- *   3. cancelarVale(valeId)
- *
- * Para rodar: certifique-se de que o ServicePublisher está ativo em
- * http://localhost:8080/vale antes de executar este cliente.
+ * Pré-requisito: ServicePublisher deve estar rodando em http://localhost:8080/vale
  */
 public class ValeClient {
 
-    private static final String ENDPOINT = "http://localhost:8080/vale";
+    private static final String ENDPOINT  = "http://localhost:8080/vale";
     private static final String NAMESPACE = "http://service.vale.fiap.com.br/";
 
     public static void main(String[] args) throws Exception {
@@ -27,35 +22,41 @@ public class ValeClient {
         System.out.println("  Cliente SOAP — Vale WebService");
         System.out.println("========================================\n");
 
-        // 1. Lista todos os funcionários
-        System.out.println(">>> [1] Listando funcionários...\n");
-        String respostaLista = enviarRequisicao(montarEnvelopeListarFuncionarios());
-        System.out.println(respostaLista);
+        // 1. Lista funcionários
+        print("[1] Listando funcionários...");
+        System.out.println(enviar(envelopeListarFuncionarios()));
 
-        // 2. Solicita vale ADIANTAMENTO_MENSAL de 35% para a Ana Silva (ID 1)
-        System.out.println(">>> [2] Solicitando ADIANTAMENTO_MENSAL de 35% para Ana Silva (ID 1)...\n");
-        String respostaSolicitar = enviarRequisicao(montarEnvelopeSolicitarVale(1, 35.0, "ADIANTAMENTO_MENSAL"));
-        System.out.println(respostaSolicitar);
+        // 2. Solicita ADIANTAMENTO_MENSAL (35%) para Ana Silva (ID 1)
+        print("[2] Solicitando ADIANTAMENTO_MENSAL 35% para Ana Silva (ID 1)...");
+        System.out.println(enviar(envelopeSolicitarVale(1, 35.0, "ADIANTAMENTO_MENSAL")));
 
-        // 3. Tenta solicitar segundo vale no mesmo mês (deve retornar erro)
-        System.out.println(">>> [3] Tentando solicitar segundo vale para Ana Silva no mesmo mês...\n");
-        String respostaSegundoVale = enviarRequisicao(montarEnvelopeSolicitarVale(1, 30.0, "ADIANTAMENTO_MENSAL"));
-        System.out.println(respostaSegundoVale);
+        // 3. Tenta segundo vale no mesmo mês → erro esperado
+        print("[3] Segundo vale no mesmo mês (erro esperado)...");
+        System.out.println(enviar(envelopeSolicitarVale(1, 30.0, "ADIANTAMENTO_MENSAL")));
 
-        // 4. Cancela o vale de ID 1
-        System.out.println(">>> [4] Cancelando vale ID 1...\n");
-        String respostaCancelar = enviarRequisicao(montarEnvelopeCancelarVale(1));
-        System.out.println(respostaCancelar);
+        // 4. Lista vales do funcionário 1
+        print("[4] Listando vales do funcionário ID 1...");
+        System.out.println(enviar(envelopeListarValesPorFuncionario(1)));
 
-        // 5. Solicita vale EMERGENCIAL para Carlos Mendes (ID 2)
-        System.out.println(">>> [5] Solicitando vale EMERGENCIAL de 15% para Carlos Mendes (ID 2)...\n");
-        String respostaEmergencial = enviarRequisicao(montarEnvelopeSolicitarVale(2, 15.0, "EMERGENCIAL"));
-        System.out.println(respostaEmergencial);
+        // 5. Lista todos os vales
+        print("[5] Listando todos os vales...");
+        System.out.println(enviar(envelopeListarVales()));
 
-        // 6. Tenta percentual inválido para o tipo (deve retornar erro)
-        System.out.println(">>> [6] Tentando EMERGENCIAL com percentual inválido (50%)...\n");
-        String respostaInvalida = enviarRequisicao(montarEnvelopeSolicitarVale(3, 50.0, "EMERGENCIAL"));
-        System.out.println(respostaInvalida);
+        // 6. Cancela vale ID 1
+        print("[6] Cancelando vale ID 1...");
+        System.out.println(enviar(envelopeCancelarVale(1)));
+
+        // 7. Solicita EMERGENCIAL 15% para Carlos (ID 2)
+        print("[7] Solicitando EMERGENCIAL 15% para Carlos Mendes (ID 2)...");
+        System.out.println(enviar(envelopeSolicitarVale(2, 15.0, "EMERGENCIAL")));
+
+        // 8. Tenta percentual inválido para EMERGENCIAL → erro esperado
+        print("[8] EMERGENCIAL com percentual 50% (erro esperado)...");
+        System.out.println(enviar(envelopeSolicitarVale(3, 50.0, "EMERGENCIAL")));
+
+        // 9. Ana solicita novo vale após cancelamento
+        print("[9] Ana solicita novo vale após cancelamento...");
+        System.out.println(enviar(envelopeSolicitarVale(1, 30.0, "ADIANTAMENTO_MENSAL")));
 
         System.out.println("\n========================================");
         System.out.println("  Demonstração concluída!");
@@ -64,63 +65,64 @@ public class ValeClient {
 
     // ---- Envelopes SOAP ----
 
-    private static String montarEnvelopeListarFuncionarios() {
-        return "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
-                "xmlns:ser=\"" + NAMESPACE + "\">" +
-                "<soapenv:Header/>" +
-                "<soapenv:Body>" +
-                "<ser:listarFuncionarios/>" +
-                "</soapenv:Body>" +
-                "</soapenv:Envelope>";
+    private static String envelopeListarFuncionarios() {
+        return envelope("<ser:listarFuncionarios/>");
     }
 
-    private static String montarEnvelopeSolicitarVale(int funcionarioId, double percentual, String tipoVale) {
-        return "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
-                "xmlns:ser=\"" + NAMESPACE + "\">" +
-                "<soapenv:Header/>" +
-                "<soapenv:Body>" +
-                "<ser:solicitarVale>" +
+    private static String envelopeListarVales() {
+        return envelope("<ser:listarVales/>");
+    }
+
+    private static String envelopeListarValesPorFuncionario(int funcionarioId) {
+        return envelope("<ser:listarValesPorFuncionario>" +
+                "<funcionarioId>" + funcionarioId + "</funcionarioId>" +
+                "</ser:listarValesPorFuncionario>");
+    }
+
+    private static String envelopeSolicitarVale(int funcionarioId, double percentual, String tipo) {
+        return envelope("<ser:solicitarVale>" +
                 "<funcionarioId>" + funcionarioId + "</funcionarioId>" +
                 "<percentualSolicitado>" + percentual + "</percentualSolicitado>" +
-                "<tipoVale>" + tipoVale + "</tipoVale>" +
-                "</ser:solicitarVale>" +
-                "</soapenv:Body>" +
-                "</soapenv:Envelope>";
+                "<tipoVale>" + tipo + "</tipoVale>" +
+                "</ser:solicitarVale>");
     }
 
-    private static String montarEnvelopeCancelarVale(int valeId) {
+    private static String envelopeCancelarVale(int valeId) {
+        return envelope("<ser:cancelarVale>" +
+                "<valeId>" + valeId + "</valeId>" +
+                "</ser:cancelarVale>");
+    }
+
+    private static String envelope(String body) {
         return "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
                 "xmlns:ser=\"" + NAMESPACE + "\">" +
-                "<soapenv:Header/>" +
-                "<soapenv:Body>" +
-                "<ser:cancelarVale>" +
-                "<valeId>" + valeId + "</valeId>" +
-                "</ser:cancelarVale>" +
-                "</soapenv:Body>" +
-                "</soapenv:Envelope>";
+                "<soapenv:Header/><soapenv:Body>" + body +
+                "</soapenv:Body></soapenv:Envelope>";
     }
 
     // ---- HTTP ----
 
-    private static String enviarRequisicao(String envelope) throws Exception {
+    private static String enviar(String envelope) throws Exception {
         URL url = new URL(ENDPOINT);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "text/xml;charset=UTF-8");
+        conn.setDoOutput(true);
 
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Content-Type", "text/xml;charset=UTF-8");
-        connection.setDoOutput(true);
-
-        try (OutputStream os = connection.getOutputStream()) {
+        try (OutputStream os = conn.getOutputStream()) {
             os.write(envelope.getBytes(StandardCharsets.UTF_8));
         }
 
-        try (Scanner scanner = new Scanner(connection.getInputStream(), StandardCharsets.UTF_8)) {
-            return scanner.useDelimiter("\\A").next();
+        try (Scanner sc = new Scanner(conn.getInputStream(), StandardCharsets.UTF_8)) {
+            return sc.useDelimiter("\\A").next();
         } catch (Exception e) {
-            // Lê o erro do servidor (fault SOAP)
-            try (Scanner scanner = new Scanner(connection.getErrorStream(), StandardCharsets.UTF_8)) {
-                return "[SOAP FAULT] " + scanner.useDelimiter("\\A").next();
+            try (Scanner sc = new Scanner(conn.getErrorStream(), StandardCharsets.UTF_8)) {
+                return "[SOAP FAULT] " + sc.useDelimiter("\\A").next();
             }
         }
+    }
+
+    private static void print(String msg) {
+        System.out.println(">>> " + msg + "\n");
     }
 }
