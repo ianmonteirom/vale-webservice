@@ -1,5 +1,17 @@
 # 💰 Vale WebService — Adiantamento Salarial SOAP
 
+**CP1 - SOA | Turma: 3ESPX**
+
+**Desenvolvido por:**
+- Carlos Henrique — RM558003
+- Mauricio Alves — RM556214
+- Ian Monteiro — RM558652
+- Bruno Silva — RM550416
+- João Hoffmann — RM550763
+
+---
+
+
 ## 📌 Contexto de Implantação
 
 O **Vale WebService** é um serviço SOAP desenvolvido para automatizar e centralizar o processo de solicitação de adiantamento salarial (vale) em empresas. Atualmente, muitas organizações ainda gerenciam esse processo de forma manual — via e-mail, planilhas ou aprovação verbal — o que gera inconsistências, retrabalho e falta de rastreabilidade.
