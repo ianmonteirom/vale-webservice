@@ -32,14 +32,14 @@ public class ValeClient {
         String respostaLista = enviarRequisicao(montarEnvelopeListarFuncionarios());
         System.out.println(respostaLista);
 
-        // 2. Solicita vale de 35% para a Ana Silva (ID 1)
-        System.out.println(">>> [2] Solicitando vale de 35% para a Ana Silva (ID 1)...\n");
-        String respostaSolicitar = enviarRequisicao(montarEnvelopeSolicitarVale(1, 35.0));
+        // 2. Solicita vale ADIANTAMENTO_MENSAL de 35% para a Ana Silva (ID 1)
+        System.out.println(">>> [2] Solicitando ADIANTAMENTO_MENSAL de 35% para Ana Silva (ID 1)...\n");
+        String respostaSolicitar = enviarRequisicao(montarEnvelopeSolicitarVale(1, 35.0, "ADIANTAMENTO_MENSAL"));
         System.out.println(respostaSolicitar);
 
         // 3. Tenta solicitar segundo vale no mesmo mês (deve retornar erro)
         System.out.println(">>> [3] Tentando solicitar segundo vale para Ana Silva no mesmo mês...\n");
-        String respostaSegundoVale = enviarRequisicao(montarEnvelopeSolicitarVale(1, 30.0));
+        String respostaSegundoVale = enviarRequisicao(montarEnvelopeSolicitarVale(1, 30.0, "ADIANTAMENTO_MENSAL"));
         System.out.println(respostaSegundoVale);
 
         // 4. Cancela o vale de ID 1
@@ -47,9 +47,14 @@ public class ValeClient {
         String respostaCancelar = enviarRequisicao(montarEnvelopeCancelarVale(1));
         System.out.println(respostaCancelar);
 
-        // 5. Tenta solicitar com percentual inválido (deve retornar erro)
-        System.out.println(">>> [5] Tentando solicitar vale com percentual inválido (50%)...\n");
-        String respostaInvalida = enviarRequisicao(montarEnvelopeSolicitarVale(2, 50.0));
+        // 5. Solicita vale EMERGENCIAL para Carlos Mendes (ID 2)
+        System.out.println(">>> [5] Solicitando vale EMERGENCIAL de 15% para Carlos Mendes (ID 2)...\n");
+        String respostaEmergencial = enviarRequisicao(montarEnvelopeSolicitarVale(2, 15.0, "EMERGENCIAL"));
+        System.out.println(respostaEmergencial);
+
+        // 6. Tenta percentual inválido para o tipo (deve retornar erro)
+        System.out.println(">>> [6] Tentando EMERGENCIAL com percentual inválido (50%)...\n");
+        String respostaInvalida = enviarRequisicao(montarEnvelopeSolicitarVale(3, 50.0, "EMERGENCIAL"));
         System.out.println(respostaInvalida);
 
         System.out.println("\n========================================");
@@ -69,7 +74,7 @@ public class ValeClient {
                 "</soapenv:Envelope>";
     }
 
-    private static String montarEnvelopeSolicitarVale(int funcionarioId, double percentual) {
+    private static String montarEnvelopeSolicitarVale(int funcionarioId, double percentual, String tipoVale) {
         return "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
                 "xmlns:ser=\"" + NAMESPACE + "\">" +
                 "<soapenv:Header/>" +
@@ -77,6 +82,7 @@ public class ValeClient {
                 "<ser:solicitarVale>" +
                 "<funcionarioId>" + funcionarioId + "</funcionarioId>" +
                 "<percentualSolicitado>" + percentual + "</percentualSolicitado>" +
+                "<tipoVale>" + tipoVale + "</tipoVale>" +
                 "</ser:solicitarVale>" +
                 "</soapenv:Body>" +
                 "</soapenv:Envelope>";
