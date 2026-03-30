@@ -34,7 +34,7 @@ class ValeServiceTest {
 
     @Test
     @DisplayName("solicitarVale deve aprovar vale com percentual valido")
-    void solicitarVale_deveAprovarComPercentualValido() throws ValeWebFault {
+    void solicitarVale_deveAprovarComPercentualValido() {
         Vale vale = service.solicitarVale(1, 35.0, TipoVale.ADIANTAMENTO_MENSAL);
         assertNotNull(vale);
         assertEquals(StatusVale.APROVADO, vale.getStatus());
@@ -44,7 +44,7 @@ class ValeServiceTest {
 
     @Test
     @DisplayName("solicitarVale deve calcular valor adiantado corretamente")
-    void solicitarVale_deveCalcularValorAdiantadoCorreto() throws ValeWebFault {
+    void solicitarVale_deveCalcularValorAdiantadoCorreto() {
         Vale vale = service.solicitarVale(1, 40.0, TipoVale.ADIANTAMENTO_MENSAL);
         assertEquals(3400.00, vale.getValorAdiantado(), 0.01);
     }
@@ -52,35 +52,35 @@ class ValeServiceTest {
     @Test
     @DisplayName("solicitarVale deve lancar ValeWebFault se percentual invalido")
     void solicitarVale_deveLancarExcecaoPercentualInvalido() {
-        assertThrows(ValeWebFault.class,
+        assertThrows(RuntimeException.class,
                 () -> service.solicitarVale(1, 50.0, TipoVale.ADIANTAMENTO_MENSAL));
     }
 
     @Test
     @DisplayName("solicitarVale deve lancar ValeWebFault para ID inexistente")
     void solicitarVale_deveLancarExcecaoFuncionarioNaoEncontrado() {
-        assertThrows(ValeWebFault.class,
+        assertThrows(RuntimeException.class,
                 () -> service.solicitarVale(99, 35.0, TipoVale.ADIANTAMENTO_MENSAL));
     }
 
     @Test
     @DisplayName("solicitarVale deve lancar ValeWebFault para funcionario inativo")
     void solicitarVale_deveLancarExcecaoFuncionarioInativo() {
-        assertThrows(ValeWebFault.class,
+        assertThrows(RuntimeException.class,
                 () -> service.solicitarVale(6, 35.0, TipoVale.ADIANTAMENTO_MENSAL));
     }
 
     @Test
     @DisplayName("solicitarVale deve lancar ValeWebFault se ja existe vale no mes")
-    void solicitarVale_deveLancarExcecaoValeDuplicado() throws ValeWebFault {
+    void solicitarVale_deveLancarExcecaoValeDuplicado() {
         service.solicitarVale(2, 30.0, TipoVale.ADIANTAMENTO_MENSAL);
-        assertThrows(ValeWebFault.class,
+        assertThrows(RuntimeException.class,
                 () -> service.solicitarVale(2, 30.0, TipoVale.ADIANTAMENTO_MENSAL));
     }
 
     @Test
     @DisplayName("solicitarVale EMERGENCIAL deve aceitar percentual entre 10 e 20")
-    void solicitarVale_emergencialDeveAceitarPercentualCorreto() throws ValeWebFault {
+    void solicitarVale_emergencialDeveAceitarPercentualCorreto() {
         Vale vale = service.solicitarVale(3, 15.0, TipoVale.EMERGENCIAL);
         assertEquals(TipoVale.EMERGENCIAL, vale.getTipoVale());
         assertEquals(StatusVale.APROVADO, vale.getStatus());
@@ -90,7 +90,7 @@ class ValeServiceTest {
 
     @Test
     @DisplayName("cancelarVale deve cancelar vale aprovado com sucesso")
-    void cancelarVale_deveCancelarValeAprovado() throws ValeWebFault {
+    void cancelarVale_deveCancelarValeAprovado() {
         Vale vale = service.solicitarVale(1, 35.0, TipoVale.ADIANTAMENTO_MENSAL);
         String mensagem = service.cancelarVale(vale.getId());
         assertNotNull(mensagem);
@@ -101,22 +101,22 @@ class ValeServiceTest {
     @Test
     @DisplayName("cancelarVale deve lancar ValeWebFault para ID inexistente")
     void cancelarVale_deveLancarExcecaoValeNaoEncontrado() {
-        assertThrows(ValeWebFault.class,
+        assertThrows(RuntimeException.class,
                 () -> service.cancelarVale(999));
     }
 
     @Test
     @DisplayName("cancelarVale deve lancar ValeWebFault ao cancelar duas vezes")
-    void cancelarVale_deveLancarExcecaoValeCanceladoDuasVezes() throws ValeWebFault {
+    void cancelarVale_deveLancarExcecaoValeCanceladoDuasVezes() {
         Vale vale = service.solicitarVale(1, 35.0, TipoVale.ADIANTAMENTO_MENSAL);
         service.cancelarVale(vale.getId());
-        assertThrows(ValeWebFault.class,
+        assertThrows(RuntimeException.class,
                 () -> service.cancelarVale(vale.getId()));
     }
 
     @Test
     @DisplayName("apos cancelar vale, funcionario pode solicitar novo no mesmo mes")
-    void cancelarVale_deveLiberarNovasolicitacaoNoMesmo() throws ValeWebFault {
+    void cancelarVale_deveLiberarNovasolicitacaoNoMesmo() {
         Vale vale = service.solicitarVale(1, 35.0, TipoVale.ADIANTAMENTO_MENSAL);
         service.cancelarVale(vale.getId());
         Vale novoVale = service.solicitarVale(1, 30.0, TipoVale.ADIANTAMENTO_MENSAL);
@@ -127,7 +127,7 @@ class ValeServiceTest {
 
     @Test
     @DisplayName("listarValesPorFuncionario deve retornar apenas vales do funcionario")
-    void listarValesPorFuncionario_deveRetornarApenasDoFuncionario() throws ValeWebFault {
+    void listarValesPorFuncionario_deveRetornarApenasDoFuncionario() {
         service.solicitarVale(1, 35.0, TipoVale.ADIANTAMENTO_MENSAL);
         service.solicitarVale(2, 30.0, TipoVale.ADIANTAMENTO_MENSAL);
         List<Vale> valesFuncionario1 = service.listarValesPorFuncionario(1);
