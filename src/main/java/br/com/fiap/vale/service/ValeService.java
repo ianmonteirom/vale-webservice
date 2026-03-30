@@ -1,5 +1,7 @@
 package br.com.fiap.vale.service;
 
+import br.com.fiap.vale.exception.ValeException;
+import br.com.fiap.vale.exception.ValeWebFault;
 import br.com.fiap.vale.model.Funcionario;
 import br.com.fiap.vale.model.StatusVale;
 import br.com.fiap.vale.model.TipoVale;
@@ -75,10 +77,14 @@ public class ValeService implements IValeService {
     @WebMethod
     public List<Vale> listarValesPorFuncionario(
             @WebParam(name = "funcionarioId") int funcionarioId
-    ) {
+    ) throws ValeWebFault {
         LOGGER.info(String.format(Constantes.LOG_LISTANDO_VALES_FUNCIONARIO, funcionarioId));
-        funcionarioValidator.validarFuncionarioAtivo(funcionarioId);
-        return repository.listarValesPorFuncionario(funcionarioId);
+        try {
+            funcionarioValidator.validarFuncionarioAtivo(funcionarioId);
+            return repository.listarValesPorFuncionario(funcionarioId);
+        } catch (ValeException ex) {
+            throw new ValeWebFault(ex.getMessage());
+        }
     }
 
     /**
@@ -90,43 +96,43 @@ public class ValeService implements IValeService {
             @WebParam(name = "funcionarioId") int funcionarioId,
             @WebParam(name = "percentualSolicitado") double percentualSolicitado,
             @WebParam(name = "tipoVale") TipoVale tipoVale
-    ) {
+    ) throws ValeWebFault {
         LOGGER.info(String.format(Constantes.LOG_SOLICITANDO_VALE,
                 funcionarioId, percentualSolicitado, tipoVale));
+        try {
+            valeValidator.validarPercentual(percentualSolicitado, tipoVale);
 
-        // 1. Valida percentual pelo tipo de vale
-        valeValidator.validarPercentual(percentualSolicitado, tipoVale);
+            Funcionario funcionario = funcionarioValidator.validarFuncionarioAtivo(funcionarioId);
 
-        // 2. Valida funcionário (existe e está ativo)
-        Funcionario funcionario = funcionarioValidator.validarFuncionarioAtivo(funcionarioId);
+            String mesAno = ValeCalculator.getMesAnoAtual();
+            valeValidator.validarValeUnicoPorMes(funcionarioId, funcionario.getNome(), mesAno);
 
-        // 3. Valida se já possui vale ativo no mês
-        String mesAno = ValeCalculator.getMesAnoAtual();
-        valeValidator.validarValeUnicoPorMes(funcionarioId, funcionario.getNome(), mesAno);
+            double valorAdiantado = ValeCalculator.calcularValorAdiantado(
+                    funcionario.getSalarioBruto(), percentualSolicitado);
 
-        // 4. Delega cálculo para ValeCalculator
-        double valorAdiantado = ValeCalculator.calcularValorAdiantado(
-                funcionario.getSalarioBruto(), percentualSolicitado);
+            Vale vale = new Vale(
+                    0,
+                    funcionarioId,
+                    funcionario.getNome(),
+                    funcionario.getSalarioBruto(),
+                    percentualSolicitado,
+                    valorAdiantado,
+                    tipoVale,
+                    ValeCalculator.getDataAtual(),
+                    StatusVale.APROVADO
+            );
 
-        Vale vale = new Vale(
-                0,
-                funcionarioId,
-                funcionario.getNome(),
-                funcionario.getSalarioBruto(),
-                percentualSolicitado,
-                valorAdiantado,
-                tipoVale,
-                ValeCalculator.getDataAtual(),
-                StatusVale.APROVADO
-        );
+            Vale valeSalvo = repository.salvarVale(vale);
 
-        Vale valeSalvo = repository.salvarVale(vale);
+            LOGGER.info(String.format(Constantes.LOG_VALE_APROVADO,
+                    valeSalvo.getId(), valeSalvo.getNomeFuncionario(),
+                    valeSalvo.getValorAdiantado(), tipoVale));
 
-        LOGGER.info(String.format(Constantes.LOG_VALE_APROVADO,
-                valeSalvo.getId(), valeSalvo.getNomeFuncionario(),
-                valeSalvo.getValorAdiantado(), tipoVale));
+            return valeSalvo;
 
-        return valeSalvo;
+        } catch (ValeException ex) {
+            throw new ValeWebFault(ex.getMessage());
+        }
     }
 
     /**
@@ -136,16 +142,20 @@ public class ValeService implements IValeService {
     @WebMethod
     public String cancelarVale(
             @WebParam(name = "valeId") int valeId
-    ) {
+    ) throws ValeWebFault {
         LOGGER.info(String.format(Constantes.LOG_CANCELANDO_VALE, valeId));
+        try {
+            Vale vale = valeValidator.validarValeCancelavel(valeId);
+            vale.setStatus(StatusVale.CANCELADO);
 
-        Vale vale = valeValidator.validarValeCancelavel(valeId);
-        vale.setStatus(StatusVale.CANCELADO);
+            LOGGER.info(String.format(Constantes.LOG_VALE_CANCELADO,
+                    valeId, vale.getNomeFuncionario()));
 
-        LOGGER.info(String.format(Constantes.LOG_VALE_CANCELADO,
-                valeId, vale.getNomeFuncionario()));
+            return String.format(Constantes.MSG_VALE_CANCELADO,
+                    valeId, vale.getNomeFuncionario(), vale.getValorAdiantado());
 
-        return String.format(Constantes.MSG_VALE_CANCELADO,
-                valeId, vale.getNomeFuncionario(), vale.getValorAdiantado());
+        } catch (ValeException ex) {
+            throw new ValeWebFault(ex.getMessage());
+        }
     }
 }

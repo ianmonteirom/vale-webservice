@@ -1,5 +1,6 @@
 package br.com.fiap.vale.service;
 
+import br.com.fiap.vale.exception.ValeWebFault;
 import br.com.fiap.vale.model.Funcionario;
 import br.com.fiap.vale.model.TipoVale;
 import br.com.fiap.vale.model.Vale;
@@ -18,7 +19,7 @@ public interface IValeService {
     List<Vale> listarVales();
 
     /** Retorna todos os vales de um funcionário específico. */
-    List<Vale> listarValesPorFuncionario(int funcionarioId);
+    List<Vale> listarValesPorFuncionario(int funcionarioId) throws ValeWebFault;
 
     /**
      * Solicita um adiantamento salarial para o funcionário.
@@ -28,7 +29,7 @@ public interface IValeService {
      * @param tipoVale             Tipo do vale que define as regras de percentual
      * @return Vale aprovado
      */
-    Vale solicitarVale(int funcionarioId, double percentualSolicitado, TipoVale tipoVale);
+    Vale solicitarVale(int funcionarioId, double percentualSolicitado, TipoVale tipoVale) throws ValeWebFault;
 
     /**
      * Cancela um vale existente pelo ID.
@@ -36,5 +37,5 @@ public interface IValeService {
      * @param valeId ID do vale
      * @return Mensagem de confirmação
      */
-    String cancelarVale(int valeId);
+    String cancelarVale(int valeId) throws ValeWebFault;
 }

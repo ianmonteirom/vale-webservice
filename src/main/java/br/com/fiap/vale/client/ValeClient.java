@@ -3,6 +3,7 @@ package br.com.fiap.vale.client;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
@@ -103,7 +104,7 @@ public class ValeClient {
     // ---- HTTP + tratamento de erro ----
 
     private static String enviar(String envelope) throws Exception {
-        URL url = new URL(ENDPOINT);
+        URL url = URI.create(ENDPOINT).toURL(); // evita deprecation do new URL(String)
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "text/xml;charset=UTF-8");
@@ -131,10 +132,6 @@ public class ValeClient {
         }
     }
 
-    /**
-     * Extrai o conteudo de faultstring do XML de erro SOAP.
-     * Se nao encontrar, retorna o XML completo como fallback.
-     */
     private static String extrairFaultString(String faultXml) {
         Matcher matcher = FAULT_PATTERN.matcher(faultXml);
         if (matcher.find()) {
