@@ -12,6 +12,7 @@
 - Ian Monteiro — RM558652
 - Bruno Silva — RM550416
 - João Hoffmann — RM550763
+- Arnaldo Filho - RM555780
 
 ---
 
