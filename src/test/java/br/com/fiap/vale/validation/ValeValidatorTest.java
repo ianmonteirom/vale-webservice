@@ -5,14 +5,11 @@ import br.com.fiap.vale.exception.ValeCanceladoException;
 import br.com.fiap.vale.exception.ValeDuplicadoException;
 import br.com.fiap.vale.exception.ValeNaoEncontradoException;
 import br.com.fiap.vale.model.*;
-import br.com.fiap.vale.repository.IValeRepository;
+import br.com.fiap.vale.support.TestFixtures;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,12 +18,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class ValeValidatorTest {
 
     private ValeValidator validator;
-    private StubValeRepository stubRepository;
+    private TestFixtures.StubRepository stub;
 
     @BeforeEach
     void setUp() {
-        stubRepository = new StubValeRepository();
-        validator = new ValeValidator(stubRepository);
+        stub = new TestFixtures.StubRepository();
+        validator = new ValeValidator(stub);
     }
 
     // ---- validarPercentual ----
@@ -78,7 +75,7 @@ class ValeValidatorTest {
     @Test
     @DisplayName("deve lançar ValeDuplicadoException se já existe vale ativo no mês")
     void validarValeUnicoPorMes_deveLancarExcecaoSeDuplicado() {
-        stubRepository.setTemValeAtivo(true);
+        stub.setTemValeAtivo(true);
         assertThrows(ValeDuplicadoException.class, () ->
                 validator.validarValeUnicoPorMes(1, "Ana Silva", "2026-03"));
     }
@@ -86,7 +83,7 @@ class ValeValidatorTest {
     @Test
     @DisplayName("deve passar sem exceção se não existe vale ativo no mês")
     void validarValeUnicoPorMes_devePassarSemValeAtivo() {
-        stubRepository.setTemValeAtivo(false);
+        stub.setTemValeAtivo(false);
         assertDoesNotThrow(() ->
                 validator.validarValeUnicoPorMes(1, "Ana Silva", "2026-03"));
     }
@@ -96,7 +93,7 @@ class ValeValidatorTest {
     @Test
     @DisplayName("deve lançar ValeNaoEncontradoException para ID inexistente")
     void validarValeCancelavel_deveLancarExcecaoValeNaoEncontrado() {
-        stubRepository.setValeParaRetornar(Optional.empty());
+        stub.setVale(Optional.empty());
         assertThrows(ValeNaoEncontradoException.class, () ->
                 validator.validarValeCancelavel(99));
     }
@@ -104,9 +101,7 @@ class ValeValidatorTest {
     @Test
     @DisplayName("deve lançar ValeCanceladoException para vale já cancelado")
     void validarValeCancelavel_deveLancarExcecaoValeCancelado() {
-        Vale valeCancelado = criarVale(StatusVale.CANCELADO);
-        stubRepository.setValeParaRetornar(Optional.of(valeCancelado));
-
+        stub.setVale(Optional.of(TestFixtures.valeCancelado()));
         assertThrows(ValeCanceladoException.class, () ->
                 validator.validarValeCancelavel(1));
     }
@@ -114,36 +109,8 @@ class ValeValidatorTest {
     @Test
     @DisplayName("deve retornar vale quando está APROVADO")
     void validarValeCancelavel_deveRetornarValeAprovado() {
-        Vale valeAprovado = criarVale(StatusVale.APROVADO);
-        stubRepository.setValeParaRetornar(Optional.of(valeAprovado));
-
+        stub.setVale(Optional.of(TestFixtures.valeAprovado()));
         Vale resultado = validator.validarValeCancelavel(1);
         assertEquals(StatusVale.APROVADO, resultado.getStatus());
-    }
-
-    // ---- Helpers ----
-
-    private Vale criarVale(StatusVale status) {
-        return new Vale(1, 1, "Ana Silva", 8500.0, 35.0, 2975.0,
-                TipoVale.ADIANTAMENTO_MENSAL, LocalDate.now().toString(), status);
-    }
-
-    // ---- Stub do repositório para testes isolados ----
-
-    static class StubValeRepository implements IValeRepository {
-
-        private boolean temValeAtivo = false;
-        private Optional<Vale> valeParaRetornar = Optional.empty();
-
-        public void setTemValeAtivo(boolean temValeAtivo) { this.temValeAtivo = temValeAtivo; }
-        public void setValeParaRetornar(Optional<Vale> vale) { this.valeParaRetornar = vale; }
-
-        @Override public List<Funcionario> listarFuncionarios() { return new ArrayList<>(); }
-        @Override public Optional<Funcionario> buscarFuncionarioPorId(int id) { return Optional.empty(); }
-        @Override public Vale salvarVale(Vale vale) { return vale; }
-        @Override public Optional<Vale> buscarValePorId(int id) { return valeParaRetornar; }
-        @Override public List<Vale> listarVales() { return new ArrayList<>(); }
-        @Override public List<Vale> listarValesPorFuncionario(int id) { return new ArrayList<>(); }
-        @Override public boolean possuiValeAtivoNoMes(int funcionarioId, String mesAno) { return temValeAtivo; }
     }
 }

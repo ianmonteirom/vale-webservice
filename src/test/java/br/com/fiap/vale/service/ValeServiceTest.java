@@ -2,21 +2,15 @@ package br.com.fiap.vale.service;
 
 import br.com.fiap.vale.exception.*;
 import br.com.fiap.vale.model.*;
-import br.com.fiap.vale.repository.IValeRepository;
+import br.com.fiap.vale.support.TestFixtures;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Testes unitários do ValeService.
- * Usa implementação in-memory real — sem mocks externos.
- */
 @DisplayName("ValeService")
 class ValeServiceTest {
 
@@ -24,8 +18,7 @@ class ValeServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Instância fresh a cada teste — dados isolados
-        service = new ValeService(new InMemoryValeRepository());
+        service = new ValeService(new TestFixtures.InMemoryValeRepository());
     }
 
     // ---- listarFuncionarios ----
@@ -53,7 +46,6 @@ class ValeServiceTest {
     @Test
     @DisplayName("solicitarVale deve calcular valor adiantado corretamente")
     void solicitarVale_deveCalcularValorAdiantadoCorreto() {
-        // Funcionário ID 1 tem salário de 8500.00
         Vale vale = service.solicitarVale(1, 40.0, TipoVale.ADIANTAMENTO_MENSAL);
         assertEquals(3400.00, vale.getValorAdiantado(), 0.01);
     }
@@ -148,61 +140,5 @@ class ValeServiceTest {
 
         assertEquals(1, valesFuncionario1.size());
         assertTrue(valesFuncionario1.stream().allMatch(v -> v.getFuncionarioId() == 1));
-    }
-
-    // ---- Repositório in-memory para testes ----
-
-    /**
-     * Repositório isolado para testes — dados independentes a cada execução.
-     */
-    static class InMemoryValeRepository implements IValeRepository {
-
-        private final List<Funcionario> funcionarios = new java.util.ArrayList<>(List.of(
-                new Funcionario(1, "Ana Silva",       "Desenvolvedora Backend", 8500.00,  true),
-                new Funcionario(2, "Carlos Mendes",   "Analista de QA",         5200.00,  true),
-                new Funcionario(3, "Fernanda Rocha",  "Scrum Master",           9800.00,  true),
-                new Funcionario(6, "Funcionario Inativo", "Cargo",              3000.00,  false)
-        ));
-
-        private final List<Vale> vales = new java.util.ArrayList<>();
-        private int counter = 1;
-
-        @Override
-        public List<Funcionario> listarFuncionarios() { return new java.util.ArrayList<>(funcionarios); }
-
-        @Override
-        public Optional<Funcionario> buscarFuncionarioPorId(int id) {
-            return funcionarios.stream().filter(f -> f.getId() == id).findFirst();
-        }
-
-        @Override
-        public Vale salvarVale(Vale vale) {
-            vale.setId(counter++);
-            vales.add(vale);
-            return vale;
-        }
-
-        @Override
-        public Optional<Vale> buscarValePorId(int id) {
-            return vales.stream().filter(v -> v.getId() == id).findFirst();
-        }
-
-        @Override
-        public List<Vale> listarVales() { return new java.util.ArrayList<>(vales); }
-
-        @Override
-        public List<Vale> listarValesPorFuncionario(int funcionarioId) {
-            return vales.stream()
-                    .filter(v -> v.getFuncionarioId() == funcionarioId)
-                    .collect(java.util.stream.Collectors.toList());
-        }
-
-        @Override
-        public boolean possuiValeAtivoNoMes(int funcionarioId, String mesAno) {
-            return vales.stream()
-                    .anyMatch(v -> v.getFuncionarioId() == funcionarioId
-                            && v.getDataSolicitacao().startsWith(mesAno)
-                            && v.getStatus().isCancelavel());
-        }
     }
 }

@@ -1,25 +1,30 @@
 package br.com.fiap.vale.repository;
 
 import br.com.fiap.vale.model.Funcionario;
-import br.com.fiap.vale.model.StatusVale;
 import br.com.fiap.vale.model.Vale;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Implementação em memória do IValeRepository.
  * Pode ser substituída por uma implementação JPA/JDBC sem alterar nenhuma outra camada.
+ *
+ * Nota: os dados são mantidos por instância — cada instância tem seu próprio estado.
+ * O ServicePublisher cria uma única instância via ValeService(), garantindo
+ * que os dados persistam durante toda a execução do servidor.
  */
 public class ValeRepository implements IValeRepository {
 
-    private static final List<Funcionario> funcionarios = new ArrayList<>();
-    private static final List<Vale> vales = new ArrayList<>();
-    private static final AtomicInteger valeIdCounter = new AtomicInteger(1);
+    // Instância — não static, evita compartilhamento de estado entre testes e execuções
+    private final List<Funcionario> funcionarios = new ArrayList<>();
+    private final List<Vale> vales = new ArrayList<>();
+    private final AtomicInteger valeIdCounter = new AtomicInteger(1);
 
-    static {
+    public ValeRepository() {
         funcionarios.add(new Funcionario(1, "Ana Silva",       "Desenvolvedora Backend", 8500.00,  true));
         funcionarios.add(new Funcionario(2, "Carlos Mendes",   "Analista de QA",         5200.00,  true));
         funcionarios.add(new Funcionario(3, "Fernanda Rocha",  "Scrum Master",           9800.00,  true));
@@ -62,7 +67,7 @@ public class ValeRepository implements IValeRepository {
     public List<Vale> listarValesPorFuncionario(int funcionarioId) {
         return vales.stream()
                 .filter(v -> v.getFuncionarioId() == funcionarioId)
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     @Override

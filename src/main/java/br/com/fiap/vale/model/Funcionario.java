@@ -1,11 +1,18 @@
 package br.com.fiap.vale.model;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * Representa um funcionário elegível a solicitar vale (adiantamento salarial).
  */
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "Funcionario", propOrder = {
+        "id", "nome", "cargo", "salarioBruto", "ativo"
+})
 public class Funcionario {
 
     private int id;
@@ -38,4 +45,10 @@ public class Funcionario {
 
     public boolean isAtivo() { return ativo; }
     public void setAtivo(boolean ativo) { this.ativo = ativo; }
+
+    @Override
+    public String toString() {
+        return String.format("Funcionario{id=%d, nome='%s', cargo='%s', salarioBruto=%.2f, ativo=%b}",
+                id, nome, cargo, salarioBruto, ativo);
+    }
 }

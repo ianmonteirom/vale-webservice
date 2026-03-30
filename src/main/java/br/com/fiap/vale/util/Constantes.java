@@ -10,15 +10,21 @@ public final class Constantes {
         // Utilitária — não deve ser instanciada
     }
 
-    // ---- Formato de data ----
-    public static final String FORMATO_MES_ANO = "yyyy-MM"; // ex: "2026-03"
-
     // ---- Mensagens de sucesso ----
     public static final String MSG_VALE_CANCELADO =
             "Vale ID %d do funcionário '%s' cancelado com sucesso. " +
                     "Valor de R$ %.2f não será descontado no próximo pagamento.";
 
-    // ---- Mensagens de log ----
+    // ---- Logs — ValeService ----
+    public static final String LOG_LISTANDO_FUNCIONARIOS =
+            "Listando todos os funcionários.";
+
+    public static final String LOG_LISTANDO_VALES =
+            "Listando todos os vales.";
+
+    public static final String LOG_LISTANDO_VALES_FUNCIONARIO =
+            "Listando vales do funcionário ID: %d";
+
     public static final String LOG_SOLICITANDO_VALE =
             "Solicitando vale: funcionarioId=%d, percentual=%.1f%%, tipo=%s";
 
@@ -30,4 +36,18 @@ public final class Constantes {
 
     public static final String LOG_VALE_CANCELADO =
             "Vale cancelado: id=%d, funcionario=%s";
+
+    // ---- Logs — FuncionarioValidator ----
+    public static final String LOG_VALIDANDO_FUNCIONARIO =
+            "Validando funcionário ID: %d";
+
+    // ---- Logs — ValeValidator ----
+    public static final String LOG_VALIDANDO_PERCENTUAL =
+            "Validando percentual %.1f%% para tipo %s";
+
+    public static final String LOG_VALIDANDO_VALE_MES =
+            "Validando duplicidade de vale para funcionário ID: %d no mês %s";
+
+    public static final String LOG_VALIDANDO_VALE_CANCELAVEL =
+            "Validando se vale ID %d pode ser cancelado";
 }

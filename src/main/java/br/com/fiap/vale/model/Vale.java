@@ -1,6 +1,9 @@
 package br.com.fiap.vale.model;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 /**
  * Representa uma solicitação de vale (adiantamento salarial).
@@ -11,6 +14,12 @@ import javax.xml.bind.annotation.XmlRootElement;
  * - O vale é descontado integralmente no pagamento oficial do mês seguinte.
  */
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "Vale", propOrder = {
+        "id", "funcionarioId", "nomeFuncionario", "salarioBruto",
+        "percentualSolicitado", "valorAdiantado", "tipoVale",
+        "dataSolicitacao", "status"
+})
 public class Vale {
 
     private int id;
@@ -66,4 +75,12 @@ public class Vale {
 
     public StatusVale getStatus() { return status; }
     public void setStatus(StatusVale status) { this.status = status; }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "Vale{id=%d, funcionarioId=%d, nome='%s', tipo=%s, percentual=%.1f%%, valor=R$ %.2f, status=%s, data='%s'}",
+                id, funcionarioId, nomeFuncionario, tipoVale, percentualSolicitado,
+                valorAdiantado, status, dataSolicitacao);
+    }
 }

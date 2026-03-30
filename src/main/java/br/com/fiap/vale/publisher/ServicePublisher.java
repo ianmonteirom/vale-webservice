@@ -1,5 +1,6 @@
 package br.com.fiap.vale.publisher;
 
+import br.com.fiap.vale.model.TipoVale;
 import br.com.fiap.vale.service.ValeService;
 
 import javax.xml.ws.Endpoint;
@@ -19,12 +20,20 @@ public class ServicePublisher {
 
         System.out.println("Operações disponíveis:");
         System.out.println("  • listarFuncionarios()");
-        System.out.println("  • solicitarVale(funcionarioId, percentualSolicitado)");
+        System.out.println("  • listarVales()");
+        System.out.println("  • listarValesPorFuncionario(funcionarioId)");
+        System.out.println("  • solicitarVale(funcionarioId, percentualSolicitado, tipoVale)");
         System.out.println("  • cancelarVale(valeId)");
+
+        System.out.println("\nTipos de vale disponíveis:");
+        for (TipoVale tipo : TipoVale.values()) {
+            System.out.println("  • " + tipo.name() + " → " + tipo.getResumo());
+        }
+
         System.out.println("\nRegras de negócio:");
-        System.out.println("  • Percentual entre 30% e 40% do salário bruto");
-        System.out.println("  • Apenas um vale ativo por funcionário por mês");
+        System.out.println("  • Apenas 1 vale ativo por funcionário por mês");
         System.out.println("  • Apenas funcionários ativos podem solicitar");
+        System.out.println("  • Cancelamento libera nova solicitação no mesmo mês");
         System.out.println("\nPressione Ctrl+C para encerrar.\n");
     }
 }

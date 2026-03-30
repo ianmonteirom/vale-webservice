@@ -1,65 +1,65 @@
 package br.com.fiap.vale.client;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Cliente SOAP que consome o ValeService.
  * Demonstra todas as operações disponíveis no WebService.
  *
- * Pré-requisito: ServicePublisher deve estar rodando em http://localhost:8080/vale
+ * Pre-requisito: ServicePublisher deve estar rodando em http://localhost:8080/vale
  */
 public class ValeClient {
 
     private static final String ENDPOINT  = "http://localhost:8080/vale";
     private static final String NAMESPACE = "http://service.vale.fiap.com.br/";
 
+    private static final Pattern FAULT_PATTERN =
+            Pattern.compile("<faultstring(?:[^>]*)>(.*?)</faultstring>", Pattern.DOTALL);
+
     public static void main(String[] args) throws Exception {
         System.out.println("\n========================================");
-        System.out.println("  Cliente SOAP — Vale WebService");
+        System.out.println("  Cliente SOAP - Vale WebService");
         System.out.println("========================================\n");
 
-        // 1. Lista funcionários
-        print("[1] Listando funcionários...");
+        print("[1] Listando funcionarios...");
         System.out.println(enviar(envelopeListarFuncionarios()));
 
-        // 2. Solicita ADIANTAMENTO_MENSAL (35%) para Ana Silva (ID 1)
         print("[2] Solicitando ADIANTAMENTO_MENSAL 35% para Ana Silva (ID 1)...");
         System.out.println(enviar(envelopeSolicitarVale(1, 35.0, "ADIANTAMENTO_MENSAL")));
 
-        // 3. Tenta segundo vale no mesmo mês → erro esperado
-        print("[3] Segundo vale no mesmo mês (erro esperado)...");
+        print("[3] Segundo vale no mesmo mes (erro esperado)...");
         System.out.println(enviar(envelopeSolicitarVale(1, 30.0, "ADIANTAMENTO_MENSAL")));
 
-        // 4. Lista vales do funcionário 1
-        print("[4] Listando vales do funcionário ID 1...");
+        print("[4] Listando vales do funcionario ID 1...");
         System.out.println(enviar(envelopeListarValesPorFuncionario(1)));
 
-        // 5. Lista todos os vales
         print("[5] Listando todos os vales...");
         System.out.println(enviar(envelopeListarVales()));
 
-        // 6. Cancela vale ID 1
         print("[6] Cancelando vale ID 1...");
         System.out.println(enviar(envelopeCancelarVale(1)));
 
-        // 7. Solicita EMERGENCIAL 15% para Carlos (ID 2)
         print("[7] Solicitando EMERGENCIAL 15% para Carlos Mendes (ID 2)...");
         System.out.println(enviar(envelopeSolicitarVale(2, 15.0, "EMERGENCIAL")));
 
-        // 8. Tenta percentual inválido para EMERGENCIAL → erro esperado
         print("[8] EMERGENCIAL com percentual 50% (erro esperado)...");
         System.out.println(enviar(envelopeSolicitarVale(3, 50.0, "EMERGENCIAL")));
 
-        // 9. Ana solicita novo vale após cancelamento
-        print("[9] Ana solicita novo vale após cancelamento...");
+        print("[9] Ana solicita novo vale apos cancelamento...");
         System.out.println(enviar(envelopeSolicitarVale(1, 30.0, "ADIANTAMENTO_MENSAL")));
 
+        print("[10] Funcionario ID 99 inexistente (erro esperado)...");
+        System.out.println(enviar(envelopeSolicitarVale(99, 35.0, "ADIANTAMENTO_MENSAL")));
+
         System.out.println("\n========================================");
-        System.out.println("  Demonstração concluída!");
+        System.out.println("  Demonstracao concluida!");
         System.out.println("========================================\n");
     }
 
@@ -100,7 +100,7 @@ public class ValeClient {
                 "</soapenv:Body></soapenv:Envelope>";
     }
 
-    // ---- HTTP ----
+    // ---- HTTP + tratamento de erro ----
 
     private static String enviar(String envelope) throws Exception {
         URL url = new URL(ENDPOINT);
@@ -113,13 +113,34 @@ public class ValeClient {
             os.write(envelope.getBytes(StandardCharsets.UTF_8));
         }
 
-        try (Scanner sc = new Scanner(conn.getInputStream(), StandardCharsets.UTF_8)) {
-            return sc.useDelimiter("\\A").next();
-        } catch (Exception e) {
-            try (Scanner sc = new Scanner(conn.getErrorStream(), StandardCharsets.UTF_8)) {
-                return "[SOAP FAULT] " + sc.useDelimiter("\\A").next();
+        int statusCode = conn.getResponseCode();
+
+        if (statusCode == 200) {
+            try (Scanner sc = new Scanner(conn.getInputStream(), "UTF-8")) {
+                return sc.useDelimiter("\\A").next();
+            }
+        } else {
+            InputStream errorStream = conn.getErrorStream();
+            if (errorStream == null) {
+                return "[ERRO] HTTP " + statusCode + " sem detalhes.";
+            }
+            try (Scanner sc = new Scanner(errorStream, "UTF-8")) {
+                String faultXml = sc.hasNext() ? sc.useDelimiter("\\A").next() : "";
+                return "[ERRO] " + extrairFaultString(faultXml);
             }
         }
+    }
+
+    /**
+     * Extrai o conteudo de faultstring do XML de erro SOAP.
+     * Se nao encontrar, retorna o XML completo como fallback.
+     */
+    private static String extrairFaultString(String faultXml) {
+        Matcher matcher = FAULT_PATTERN.matcher(faultXml);
+        if (matcher.find()) {
+            return matcher.group(1).trim();
+        }
+        return faultXml;
     }
 
     private static void print(String msg) {
